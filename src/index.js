@@ -10,37 +10,37 @@ import drawImage from "./drawImage";
 function midPointBtw(p1, p2) {
   return {
     x: p1.x + (p2.x - p1.x) / 2,
-    y: p1.y + (p2.y - p1.y) / 2
+    y: p1.y + (p2.y - p1.y) / 2,
   };
 }
 
 const canvasStyle = {
   display: "block",
-  position: "absolute"
+  position: "absolute",
 };
 
 const canvasTypes = [
   {
     name: "interface",
-    zIndex: 15
+    zIndex: 15,
   },
   {
     name: "drawing",
-    zIndex: 11
+    zIndex: 11,
   },
   {
     name: "temp",
-    zIndex: 12
+    zIndex: 12,
   },
   {
     name: "grid",
-    zIndex: 10
-  }
+    zIndex: 10,
+  },
 ];
 
 const dimensionsPropTypes = PropTypes.oneOfType([
   PropTypes.number,
-  PropTypes.string
+  PropTypes.string,
 ]);
 
 export default class extends PureComponent {
@@ -60,7 +60,7 @@ export default class extends PureComponent {
     imgSrc: PropTypes.string,
     saveData: PropTypes.string,
     immediateLoading: PropTypes.bool,
-    hideInterface: PropTypes.bool
+    hideInterface: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -79,7 +79,7 @@ export default class extends PureComponent {
     imgSrc: "",
     saveData: "",
     immediateLoading: false,
-    hideInterface: false
+    hideInterface: false,
   };
 
   constructor(props) {
@@ -105,8 +105,8 @@ export default class extends PureComponent {
       enabled: true,
       initialPoint: {
         x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-      }
+        y: window.innerHeight / 2,
+      },
     });
     this.chainLength = this.props.lazyRadius * window.devicePixelRatio;
 
@@ -116,6 +116,7 @@ export default class extends PureComponent {
     this.canvasObserver.observe(this.canvasContainer);
 
     this.drawImage();
+    this.fillBackground();
     this.loop();
 
     window.setTimeout(() => {
@@ -188,7 +189,7 @@ export default class extends PureComponent {
     return JSON.stringify({
       lines: this.lines,
       width: this.props.canvasWidth,
-      height: this.props.canvasHeight
+      height: this.props.canvasHeight,
     });
   };
 
@@ -211,7 +212,7 @@ export default class extends PureComponent {
     ) {
       this.simulateDrawingLines({
         lines,
-        immediate
+        immediate,
       });
     } else {
       // we need to rescale the lines based on saved & current dimensions
@@ -220,15 +221,15 @@ export default class extends PureComponent {
       const scaleAvg = (scaleX + scaleY) / 2;
 
       this.simulateDrawingLines({
-        lines: lines.map(line => ({
+        lines: lines.map((line) => ({
           ...line,
-          points: line.points.map(p => ({
+          points: line.points.map((p) => ({
             x: p.x * scaleX,
-            y: p.y * scaleY
+            y: p.y * scaleY,
           })),
-          brushRadius: line.brushRadius * scaleAvg
+          brushRadius: line.brushRadius * scaleAvg,
         })),
-        immediate
+        immediate,
       });
     }
   };
@@ -239,7 +240,7 @@ export default class extends PureComponent {
     let curTime = 0;
     let timeoutGap = immediate ? 0 : this.props.loadTimeOffset;
 
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const { points, brushColor, brushRadius } = line;
 
       // Draw all at once if immediate flag is set, instead of using setTimeout
@@ -248,7 +249,7 @@ export default class extends PureComponent {
         this.drawPoints({
           points,
           brushColor,
-          brushRadius
+          brushRadius,
         });
 
         // Save line with the drawn points
@@ -264,7 +265,7 @@ export default class extends PureComponent {
           this.drawPoints({
             points: points.slice(0, i + 1),
             brushColor,
-            brushRadius
+            brushRadius,
           });
         }, curTime);
       }
@@ -278,7 +279,7 @@ export default class extends PureComponent {
     });
   };
 
-  handleDrawStart = e => {
+  handleDrawStart = (e) => {
     e.preventDefault();
 
     // Start drawing
@@ -295,14 +296,14 @@ export default class extends PureComponent {
     this.handlePointerMove(x, y);
   };
 
-  handleDrawMove = e => {
+  handleDrawMove = (e) => {
     e.preventDefault();
 
     const { x, y } = this.getPointerPos(e);
     this.handlePointerMove(x, y);
   };
 
-  handleDrawEnd = e => {
+  handleDrawEnd = (e) => {
     e.preventDefault();
 
     // Draw to this end pos
@@ -337,7 +338,7 @@ export default class extends PureComponent {
     canvas.style.height = height;
   };
 
-  getPointerPos = e => {
+  getPointerPos = (e) => {
     const rect = this.canvas.interface.getBoundingClientRect();
 
     // use cursor pos as default
@@ -353,7 +354,7 @@ export default class extends PureComponent {
     // return mouse/touch position inside canvas
     return {
       x: clientX - rect.left,
-      y: clientY - rect.top
+      y: clientY - rect.top,
     };
   };
 
@@ -380,7 +381,7 @@ export default class extends PureComponent {
       this.drawPoints({
         points: this.points,
         brushColor: this.props.brushColor,
-        brushRadius: this.props.brushRadius
+        brushRadius: this.props.brushRadius,
       });
     }
 
@@ -428,7 +429,7 @@ export default class extends PureComponent {
     this.lines.push({
       points: [...this.points],
       brushColor: brushColor || this.props.brushColor,
-      brushRadius: brushRadius || this.props.brushRadius
+      brushRadius: brushRadius || this.props.brushRadius,
     });
 
     // Reset points array
@@ -459,11 +460,28 @@ export default class extends PureComponent {
       this.canvas.drawing.width,
       this.canvas.drawing.height
     );
+    this.ctx.drawing.fillStyle = "#FFFFFF";
+    this.ctx.drawing.fillRect(
+      0,
+      0,
+      this.canvas.drawing.width,
+      this.canvas.drawing.height
+    );
     this.ctx.temp.clearRect(
       0,
       0,
       this.canvas.temp.width,
       this.canvas.temp.height
+    );
+  };
+  fillBackground = () => {
+    this.valuesChanged = true;
+    this.ctx.drawing.fillStyle = "#FFFFFF";
+    this.ctx.drawing.fillRect(
+      0,
+      0,
+      this.canvas.drawing.width,
+      this.canvas.drawing.height
     );
   };
 
@@ -484,7 +502,7 @@ export default class extends PureComponent {
     }
   };
 
-  drawGrid = ctx => {
+  drawGrid = (ctx) => {
     if (this.props.hideGrid) return;
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -564,9 +582,9 @@ export default class extends PureComponent {
           touchAction: "none",
           width: this.props.canvasWidth,
           height: this.props.canvasHeight,
-          ...this.props.style
+          ...this.props.style,
         }}
-        ref={container => {
+        ref={(container) => {
           if (container) {
             this.canvasContainer = container;
           }
@@ -577,7 +595,7 @@ export default class extends PureComponent {
           return (
             <canvas
               key={name}
-              ref={canvas => {
+              ref={(canvas) => {
                 if (canvas) {
                   this.canvas[name] = canvas;
                   this.ctx[name] = canvas.getContext("2d");
